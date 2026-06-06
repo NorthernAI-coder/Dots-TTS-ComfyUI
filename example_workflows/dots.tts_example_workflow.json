@@ -1,0 +1,456 @@
+{
+  "id": "03dd8e5c-17a3-481a-bb6f-640bd5314cf5",
+  "revision": 0,
+  "last_node_id": 13,
+  "last_link_id": 13,
+  "nodes": [
+    {
+      "id": 7,
+      "type": "DotsTTSWhisperTranscribe",
+      "pos": [
+        2184.5857163493515,
+        2196.62629275327
+      ],
+      "size": [
+        294.5259765625,
+        178
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transcript",
+          "type": "STRING",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DotsTTSWhisperTranscribe"
+      },
+      "widgets_values": [
+        "whisper-large-v3-turbo (auto-download)",
+        "auto",
+        "auto",
+        "transcribe",
+        30,
+        true
+      ]
+    },
+    {
+      "id": 2,
+      "type": "DotsTTSGenerate",
+      "pos": [
+        2502.1407019054354,
+        1603.7832090009038
+      ],
+      "size": [
+        395.58141052593965,
+        302.50985764074403
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "dotstts_model",
+          "type": "DOTSTTS_MODEL",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DotsTTSGenerate"
+      },
+      "widgets_values": [
+        "Hello! This is Dots TTS running inside ComfyUI.",
+        10,
+        1,
+        1138068484,
+        "randomize",
+        "auto",
+        false,
+        500
+      ]
+    },
+    {
+      "id": 6,
+      "type": "LoadAudio",
+      "pos": [
+        2185.90769073822,
+        2007.2387815445827
+      ],
+      "size": [
+        289.6409363680759,
+        136
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            6,
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.24.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "sample-4.mp3",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 8,
+      "type": "SaveAudioAdvanced",
+      "pos": [
+        2913.103580732536,
+        1604.234068438118
+      ],
+      "size": [
+        341.39202894520395,
+        160
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.24.0",
+        "Node name for S&R": "SaveAudioAdvanced"
+      },
+      "widgets_values": [
+        "audio/dots-tts/ComfyUI",
+        "mp3",
+        "V0"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveAudioAdvanced",
+      "pos": [
+        2912.0077698794516,
+        2020.0428336709483
+      ],
+      "size": [
+        341.39202894520395,
+        160
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 5
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.24.0",
+        "Node name for S&R": "SaveAudioAdvanced"
+      },
+      "widgets_values": [
+        "audio/dots-tts/ComfyUI",
+        "mp3",
+        "V0"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "DotsTTSLoadModel",
+      "pos": [
+        2181.6118308936852,
+        1604.8573748157096
+      ],
+      "size": [
+        282.881303103512,
+        154
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "dotstts_model",
+          "type": "DOTSTTS_MODEL",
+          "links": [
+            12,
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DotsTTSLoadModel"
+      },
+      "widgets_values": [
+        "dots.tts SOAR BF16 (auto-download)",
+        "auto",
+        "auto",
+        "flash_attention",
+        true
+      ]
+    },
+    {
+      "id": 5,
+      "type": "DotsTTSVoiceClone",
+      "pos": [
+        2495.6911936873776,
+        2013.7212323065564
+      ],
+      "size": [
+        402.3748223279754,
+        358.04012513747216
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "dotstts_model",
+          "type": "DOTSTTS_MODEL",
+          "link": 13
+        },
+        {
+          "name": "reference_audio",
+          "type": "AUDIO",
+          "link": 8
+        },
+        {
+          "name": "reference_text",
+          "type": "STRING",
+          "widget": {
+            "name": "reference_text"
+          },
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DotsTTSVoiceClone"
+      },
+      "widgets_values": [
+        "Oh, for heaven’s sake. I leave the room for five minutes, and somehow everything is on fire, someone’s arguing, and nobody has done the one thing I asked. Honestly, I deserve a vacation.",
+        "",
+        10,
+        0,
+        1689868564,
+        "randomize",
+        "auto",
+        false,
+        500
+      ]
+    },
+    {
+      "id": 13,
+      "type": "MarkdownNote",
+      "pos": [
+        2484.4667814413338,
+        2427.3577295959753
+      ],
+      "size": [
+        456.1883354754841,
+        275.630077963609
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "‎",
+      "properties": {},
+      "widgets_values": [
+        "## dots.tts Models (Quick Reference)\n\n| Model | Recommended Steps (NFE) | CFG / Guidance Scale | Primary Use Case |\n|---------|-----------------------|----------------------|------------------|\n| **dots.tts-base** | 10–32 | 1.2 (adjustable) | Fine-tuning, research, full quality/latency control |\n| **dots.tts-soar** | 10–32 | 1.2 (adjustable) | Highest-quality zero-shot voice cloning, best speaker similarity |\n| **dots.tts-mf** | 4 | 0 | Low-latency production inference |\n\n### Simple Recommendation\n\n- **Quality first** → `dots.tts-soar`\n- **Speed first** → `dots.tts-mf`\n- **Training / fine-tuning** → `dots.tts-base`"
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 12,
+      "type": "MarkdownNote",
+      "pos": [
+        1684.1880962433852,
+        1564.479053996161
+      ],
+      "size": [
+        475.06990879967634,
+        1133.7711050341425
+      ],
+      "flags": {
+        "pinned": true
+      },
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "‎",
+      "properties": {},
+      "widgets_values": [
+        "## Dots-TTS-ComfyUI Model Requirements\n\n**VRAM:** Recommended BF16 usage is roughly **8-16 GB VRAM** depending on the selected model, text length, voice cloning references, generation length, attention backend, and other loaded models.\n\nDots-TTS-ComfyUI includes **AIMDO / ComfyUI model-management integration** \n\n## Models\n\n### dotstts\n\n**Official FP32 Models**\n\n- 🤗 [rednote-hilab/dots.tts-base](https://huggingface.co/rednote-hilab/dots.tts-base)\n- 🤗 [rednote-hilab/dots.tts-soar](https://huggingface.co/rednote-hilab/dots.tts-soar)\n- 🤗 [rednote-hilab/dots.tts-mf](https://huggingface.co/rednote-hilab/dots.tts-mf)\n\n**BF16 Models**\n\n- 🤗 [drbaph/dots.tts-base-bf16](https://huggingface.co/drbaph/dots.tts-base-bf16)\n- 🤗 [drbaph/dots.tts-soar-bf16](https://huggingface.co/drbaph/dots.tts-soar-bf16)\n- 🤗 [drbaph/dots.tts-mf-bf16](https://huggingface.co/drbaph/dots.tts-mf-bf16)\n\n### dotstts/common\n\nShared assets required by all model variants:\n\n- 🤗 [drbaph/dots.tts-common](https://huggingface.co/drbaph/dots.tts-common)\n  - `speaker_encoder.safetensors`\n  - `vocoder.safetensors`\n\n### audio_encoders (Optional Whisper Transcription Node)\n\n- 🤗 [openai/whisper-large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo) *(recommended)*\n- 🤗 [openai/whisper-large-v3](https://huggingface.co/openai/whisper-large-v3)\n- 🤗 [openai/whisper-medium](https://huggingface.co/openai/whisper-medium)\n- 🤗 [openai/whisper-small](https://huggingface.co/openai/whisper-small)\n- 🤗 [openai/whisper-tiny](https://huggingface.co/openai/whisper-tiny)\n\n## Model Storage Location\n\n```text\nComfyUI/\n└── models/\n    ├── dotstts/\n    │   ├── common/\n    │   │   ├── speaker_encoder.safetensors\n    │   │   └── vocoder.safetensors\n    │   ├── dots.tts-base/\n    │   │   └── model.safetensors\n    │   ├── dots.tts-soar/\n    │   │   └── model.safetensors\n    │   ├── dots.tts-mf/\n    │   │   └── model.safetensors\n    │   ├── dots.tts-base-bf16/\n    │   │   └── dots.tts-base-bf16.safetensors\n    │   ├── dots.tts-soar-bf16/\n    │   │   └── dots.tts-soar-bf16.safetensors\n    │   └── dots.tts-mf-bf16/\n    │       └── dots.tts-mf-bf16.safetensors\n    └── audio_encoders/\n        ├── openai_whisper-large-v3-turbo/\n        ├── openai_whisper-large-v3/\n        ├── openai_whisper-medium/\n        ├── openai_whisper-small/\n        └── openai_whisper-tiny/\n```\n\n\n### BF16 variants automatically use the matching source-model assets. Shared heavy files are stored only once under:\n\n```text\nComfyUI/models/dotstts/common/\n```\n\nIf `download_if_missing` is enabled, missing assets are downloaded automatically.\n\n## Links\n\n- [Issues](https://github.com/Saganaki22/Dots-TTS-ComfyUI/issues)\n- [Dots-TTS-ComfyUI](https://github.com/Saganaki22/Dots-TTS-ComfyUI)\n\n## Original Repo\n- [Official dots.tts Repository](https://github.com/rednote-hilab/dots.tts)\n"
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    }
+  ],
+  "links": [
+    [
+      5,
+      5,
+      0,
+      3,
+      0,
+      "AUDIO"
+    ],
+    [
+      6,
+      6,
+      0,
+      7,
+      0,
+      "AUDIO"
+    ],
+    [
+      7,
+      7,
+      0,
+      5,
+      2,
+      "STRING"
+    ],
+    [
+      8,
+      6,
+      0,
+      5,
+      1,
+      "AUDIO"
+    ],
+    [
+      9,
+      2,
+      0,
+      8,
+      0,
+      "AUDIO"
+    ],
+    [
+      12,
+      11,
+      0,
+      2,
+      0,
+      "DOTSTTS_MODEL"
+    ],
+    [
+      13,
+      11,
+      0,
+      5,
+      0,
+      "DOTSTTS_MODEL"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Text to speech Generation",
+      "bounding": [
+        2492.1407019054354,
+        1533.7832090009038,
+        775.7759618938426,
+        382.50985764074403
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Voice Clone",
+      "bounding": [
+        2174.5857163493515,
+        1937.2387815445827,
+        1092.235136596842,
+        447.3875112086871
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Model Loader",
+      "bounding": [
+        2171.6118308936852,
+        1534.8573748157096,
+        302.881303103512,
+        234
+      ],
+      "color": "#8AA",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6588450000000049,
+      "offset": [
+        -910.6974041963886,
+        -999.9303827734711
+      ]
+    },
+    "frontendVersion": "1.45.15",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

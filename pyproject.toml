@@ -1,0 +1,29 @@
+[project]
+name = "Dots-TTS-ComfyUI"
+description = "ComfyUI custom nodes for rednote-hilab dots.tts with model loading, generation, voice cloning, Whisper transcription, progress tracking, and AIMDO memory visualization"
+version = "0.1.0"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/Saganaki22/Dots-TTS-ComfyUI"
+DotsTTS = "https://github.com/rednote-hilab/dots.tts"
+BaseModel = "https://huggingface.co/rednote-hilab/dots.tts-base"
+SoarModel = "https://huggingface.co/rednote-hilab/dots.tts-soar"
+MeanFlowModel = "https://huggingface.co/rednote-hilab/dots.tts-mf"
+
+[tool.comfy]
+PublisherId = "saganaki22"
+DisplayName = "Dots TTS"
+Icon = "https://avatars.githubusercontent.com/u/84208527"
+PreInstall = "install.py"
+
+[tool.dots-tts-comfyui]
+models-folder = "ComfyUI/models/dotstts"
+heavy-common-folder = "ComfyUI/models/dotstts/common"
+heavy-common-repo = "drbaph/dots.tts-common"
+heavy-common-files = ["vocoder.safetensors", "speaker_encoder.safetensors"]
+small-assets-folders = ["assets/dots.tts-base", "assets/dots.tts-soar", "assets/dots.tts-mf"]
+fp32-weight-file = "model.safetensors"
+bf16-weight-files = ["dots.tts-base-bf16.safetensors", "dots.tts-soar-bf16.safetensors", "dots.tts-mf-bf16.safetensors"]
+protected-runtime = ["torch", "torchaudio", "torchvision", "transformers", "pydantic"]

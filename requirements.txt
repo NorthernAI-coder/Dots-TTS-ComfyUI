@@ -1,0 +1,12 @@
+# Runtime helpers only. ComfyUI manages torch/torchaudio/torchvision.
+# install.py intentionally warns about transformers/pydantic instead of upgrading them.
+huggingface-hub>=0.26.0
+safetensors
+soundfile>=0.13.1
+numpy
+scipy
+einops
+loguru
+PyYAML
+torchdiffeq
+
