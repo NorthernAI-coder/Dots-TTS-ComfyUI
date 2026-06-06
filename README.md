@@ -4,6 +4,8 @@
 
 ComfyUI custom nodes for [rednote-hilab/dots.tts](https://github.com/rednote-hilab/dots.tts).
 
+
+
 ## Nodes
 
 - Dots TTS Load Model
@@ -144,7 +146,19 @@ Audio file I/O uses `soundfile` first. Dots' speaker feature path has a torchaud
 [hf-mf-bf16]: https://huggingface.co/drbaph/dots.tts-mf-bf16
 [hf-common]: https://huggingface.co/drbaph/dots.tts-common
 [hf-whisper-turbo]: https://huggingface.co/openai/whisper-large-v3-turbo
-[hf-whisper-large]: https://huggingface.co/openai/whisper-large-v3
-[hf-whisper-medium]: https://huggingface.co/openai/whisper-medium
-[hf-whisper-small]: https://huggingface.co/openai/whisper-small
-[hf-whisper-tiny]: https://huggingface.co/openai/whisper-tiny
+
+## Citation
+
+```bibtex
+@article{dotstts2026,
+  title   = {dots.tts Technical Report},
+  author  = {dots.tts Team},
+  journal = {arXiv preprint},
+  year    = {2026},
+}
+```
+
+## License
+
+Released under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
