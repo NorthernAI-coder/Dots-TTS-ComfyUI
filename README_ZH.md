@@ -29,6 +29,20 @@
 5. `dots.tts SOAR BF16 (auto-download)` - [drbaph/dots.tts-soar-bf16][hf-soar-bf16]
 6. `dots.tts MF BF16 (auto-download)` - [drbaph/dots.tts-mf-bf16][hf-mf-bf16]
 
+## dots.tts 模型速查
+
+| 模型 | 推荐步数 (NFE) | CFG / 引导系数 | 主要用途 |
+|------|--------------|---------------|---------|
+| **dots.tts-base** | 10–32 | 1.2（可调） | 微调、研究、完全的质量/延迟控制 |
+| **dots.tts-soar** | 10–32 | 1.2（可调） | 最高质量的零样本语音克隆，最佳说话人相似度 |
+| **dots.tts-mf** | 4 | 0 | 低延迟生产推理 |
+
+### 简单建议
+
+- **优先质量** → `dots.tts-soar`
+- **优先速度** → `dots.tts-mf`
+- **训练 / 微调** → `dots.tts-base`
+
 下载的模型文件放置如下：
 
 ```text

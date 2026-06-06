@@ -29,6 +29,20 @@ The loader catalog shows the official Rednote checkpoints first, then the drbaph
 5. `dots.tts SOAR BF16 (auto-download)` - [drbaph/dots.tts-soar-bf16][hf-soar-bf16]
 6. `dots.tts MF BF16 (auto-download)` - [drbaph/dots.tts-mf-bf16][hf-mf-bf16]
 
+## dots.tts Models (Quick Reference)
+
+| Model | Recommended Steps (NFE) | CFG / Guidance Scale | Primary Use Case |
+|---------|-----------------------|----------------------|------------------|
+| **dots.tts-base** | 10–32 | 1.2 (adjustable) | Fine-tuning, research, full quality/latency control |
+| **dots.tts-soar** | 10–32 | 1.2 (adjustable) | Highest-quality zero-shot voice cloning, best speaker similarity |
+| **dots.tts-mf** | 4 | 0 | Low-latency production inference |
+
+### Simple Recommendation
+
+- **Quality first** → `dots.tts-soar`
+- **Speed first** → `dots.tts-mf`
+- **Training / fine-tuning** → `dots.tts-base`
+
 Downloaded model files are placed like this:
 
 ```text
