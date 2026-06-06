@@ -132,10 +132,6 @@ Audio file I/O uses `soundfile` first. Dots' speaker feature path has a torchaud
 - [drbaph Dots TTS MF BF16 model][hf-mf-bf16]
 - [drbaph Dots TTS shared common files][hf-common]
 - [OpenAI Whisper large-v3-turbo][hf-whisper-turbo]
-- [OpenAI Whisper large-v3][hf-whisper-large]
-- [OpenAI Whisper medium][hf-whisper-medium]
-- [OpenAI Whisper small][hf-whisper-small]
-- [OpenAI Whisper tiny][hf-whisper-tiny]
 
 [dots-repo]: https://github.com/rednote-hilab/dots.tts
 [hf-base]: https://huggingface.co/rednote-hilab/dots.tts-base
