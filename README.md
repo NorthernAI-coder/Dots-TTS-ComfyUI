@@ -83,9 +83,6 @@ Shared heavy assets come from [drbaph/dots.tts-common][hf-common] and are stored
 drbaph/dots.tts-common/speaker_encoder.safetensors
 drbaph/dots.tts-common/vocoder.safetensors
 ```
-
-The BF16 repos should not contain a `/common/` folder. Upload only the one BF16 model file to each BF16 repo. The downloader checks shared heavy files and the selected model weight independently, so if `speaker_encoder.safetensors` and `vocoder.safetensors` are already present it only downloads the missing main model file.
-
 At load time the node assembles an upstream-compatible runtime cache under `runtime/` using links/copies from node assets, shared heavy assets, and the selected model weight. The loader uses Hugging Face directly and does not use HF mirrors.
 
 ## Generation Limits
