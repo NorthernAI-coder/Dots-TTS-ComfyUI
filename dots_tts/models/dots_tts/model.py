@@ -340,17 +340,29 @@ class DotsTtsModel(nn.Module):
         cache_key = (key, signature)
         compiled = self._compiled_models.get(cache_key)
         if compiled is None:
-            mode = (
-                "default"
-                if key == "patch_encoder.decode_patch"
-                else "reduce-overhead"
-            )
-            compiled = torch.compile(
-                model,
-                mode=mode,
-                fullgraph=True,
-                dynamic=False,
-            )
+            try:
+                allocator_backend = torch.cuda.memory.get_allocator_backend()
+            except Exception:
+                allocator_backend = ""
+            if allocator_backend.lower() == "cudamallocasync":
+                compiled = torch.compile(
+                    model,
+                    options={"triton.cudagraphs": False},
+                    fullgraph=True,
+                    dynamic=False,
+                )
+            else:
+                mode = (
+                    "default"
+                    if key == "patch_encoder.decode_patch"
+                    else "reduce-overhead"
+                )
+                compiled = torch.compile(
+                    model,
+                    mode=mode,
+                    fullgraph=True,
+                    dynamic=False,
+                )
             self._compiled_models[cache_key] = compiled
             logger.info(
                 "Compiled inference target: key={} target={} signature={}",

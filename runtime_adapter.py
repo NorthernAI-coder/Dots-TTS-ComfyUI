@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import tempfile
 from pathlib import Path
 from typing import Callable
@@ -11,6 +12,8 @@ import torch
 from tqdm import tqdm
 
 from .loader import DotsTTSBundle, resume_bundle_to_device
+
+logger = logging.getLogger("Dots-TTS-ComfyUI")
 
 
 def manual_seed_all(seed: int) -> None:
@@ -91,6 +94,14 @@ def generate_dotstts(
         manual_seed_all(int(seed))
     resume_bundle_to_device(bundle)
     max_audio_patches = max(1, min(int(max_audio_patches), 4096))
+    if bundle.compile:
+        buckets = getattr(bundle.runtime.model, "_GENERATE_LENGTH_BUCKETS", ())
+        compile_limit = int(getattr(buckets[-1], "size", 1024)) if buckets else 1024
+        if max_audio_patches > compile_limit:
+            raise ValueError(
+                "Dots TTS torch.compile supports max_audio_patches up to "
+                f"{compile_limit}. Lower max_audio_patches or disable compile."
+            )
     previous_max_audio_patches = int(bundle.runtime.max_generate_length)
     bundle.runtime.max_generate_length = max_audio_patches
 
@@ -105,12 +116,21 @@ def generate_dotstts(
     total = max_audio_patches
     cli_progress = tqdm(
         total=total,
-        desc="[Dots-TTS-ComfyUI] Generating",
+        desc=(
+            "[Dots-TTS-ComfyUI] Preparing/compiling"
+            if bundle.compile
+            else "[Dots-TTS-ComfyUI] Preparing"
+        ),
         ascii=False,
         dynamic_ncols=True,
         mininterval=0.0,
         miniters=10,
         leave=True,
+    )
+    logger.info(
+        "Dots TTS generation preparation started%s. Progress begins after the first "
+        "audio patch is ready.",
+        " with lazy torch.compile" if bundle.compile else "",
     )
     generation_completed = False
     try:
@@ -126,6 +146,8 @@ def generate_dotstts(
             ),
             start=1,
         ):
+            if index == 1:
+                cli_progress.set_description("[Dots-TTS-ComfyUI] Generating")
             chunks.append(chunk.detach().float().cpu())
             cli_progress.update(1)
             if progress_callback is not None:

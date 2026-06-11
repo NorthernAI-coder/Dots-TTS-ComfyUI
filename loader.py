@@ -146,6 +146,7 @@ class DotsTTSBundle:
     dtype_choice: str = "auto"
     device_choice: str = "auto"
     download_if_missing: bool = True
+    compile: bool = False
 
 
 def _same_device(a: torch.device, b: torch.device) -> bool:
@@ -750,6 +751,56 @@ def resolve_attention(attention: str, device: torch.device | None = None) -> tup
     raise ValueError(f"Unsupported attention mode: {attention}")
 
 
+def resolve_compile(compile_requested: bool, device: torch.device) -> bool:
+    if not compile_requested:
+        return False
+    device = torch.device(device)
+    if device.type != "cuda":
+        raise RuntimeError(
+            "torch.compile is currently supported by this node only on CUDA. "
+            f"The selected Dots TTS device is {device.type}."
+        )
+    if not hasattr(torch, "compile"):
+        raise RuntimeError("torch.compile is unavailable in the installed PyTorch build.")
+    if importlib.util.find_spec("triton") is None:
+        raise ImportError(
+            "torch.compile was enabled, but Triton is not installed. Install a Triton "
+            "build compatible with this ComfyUI PyTorch environment, or disable compile."
+        )
+    try:
+        triton = importlib.import_module("triton")
+        triton_version = getattr(triton, "__version__", "unknown")
+    except Exception as exc:
+        raise ImportError(
+            "torch.compile was enabled, but Triton could not be imported. Install a "
+            "Triton build compatible with this ComfyUI PyTorch environment, or disable compile."
+        ) from exc
+    try:
+        from torch._dynamo import list_backends
+
+        available_backends = list_backends()
+    except Exception as exc:
+        raise RuntimeError("PyTorch Dynamo/Inductor is unavailable in this build.") from exc
+    if "inductor" not in available_backends:
+        raise RuntimeError("The PyTorch Inductor compile backend is unavailable.")
+    try:
+        allocator_backend = torch.cuda.memory.get_allocator_backend()
+    except Exception:
+        allocator_backend = "unknown"
+    if allocator_backend.lower() == "cudamallocasync":
+        logger.info(
+            "Dots TTS detected cudaMallocAsync; CUDA Graph Trees will be disabled "
+            "for compatibility while Inductor/Triton compilation remains enabled."
+        )
+    logger.info(
+        "Dots TTS torch.compile enabled with Inductor/Triton %s. The first generation "
+        "for each audio-length bucket will compile and be slower; later generations "
+        "reuse the compiled graphs.",
+        triton_version,
+    )
+    return True
+
+
 def _register_with_comfy(patcher: Any) -> None:
     if patcher is None:
         return
@@ -1000,6 +1051,35 @@ def resume_bundle_to_device(bundle: DotsTTSBundle) -> None:
         bundle.runtime.device = bundle.device
 
 
+def _clear_model_compile_state(model: torch.nn.Module | None) -> None:
+    if model is None:
+        return
+    try:
+        model.set_optimize(False)
+    except Exception:
+        pass
+    for attr in (
+        "_compiled_models",
+        "_static_generate_workspaces",
+        "_fm_decode_workspaces",
+    ):
+        value = getattr(model, attr, None)
+        if hasattr(value, "clear"):
+            try:
+                value.clear()
+            except Exception:
+                pass
+
+
+def _enable_bundle_compile(bundle: DotsTTSBundle) -> None:
+    runtime = bundle.runtime
+    model = runtime.model if runtime is not None else None
+    if runtime is None or model is None:
+        raise RuntimeError("Cannot configure torch.compile on an unloaded Dots TTS bundle.")
+    runtime.optimize = bool(bundle.compile)
+    model.set_optimize(bool(bundle.compile))
+
+
 def unload_dotstts_bundle(bundle: DotsTTSBundle | None, reason: str = "manual unload", hard: bool = True) -> None:
     global _ACTIVE_BUNDLE, _ACTIVE_LOAD_KEY
     if bundle is None:
@@ -1007,6 +1087,9 @@ def unload_dotstts_bundle(bundle: DotsTTSBundle | None, reason: str = "manual un
     logger.info("Unloading Dots TTS bundle (%s).", reason)
     runtime = bundle.runtime
     model = runtime.model if runtime is not None else None
+    if runtime is not None:
+        runtime.optimize = False
+    _clear_model_compile_state(model)
     if bundle.patchers:
         for patcher in list(bundle.patchers):
             unload_runtime_module(patcher, hard=hard)
@@ -1026,12 +1109,6 @@ def unload_dotstts_bundle(bundle: DotsTTSBundle | None, reason: str = "manual un
                     setattr(model, attr, None)
                 except Exception:
                     pass
-            try:
-                compiled = getattr(model, "_compiled_models", None)
-                if hasattr(compiled, "clear"):
-                    compiled.clear()
-            except Exception:
-                pass
     except Exception:
         pass
     if hard:
@@ -1136,6 +1213,7 @@ def load_dotstts_bundle(
     device_name: str,
     attention: str,
     download_if_missing: bool,
+    compile: bool = False,
 ) -> DotsTTSBundle:
     global _ACTIVE_BUNDLE, _ACTIVE_LOAD_KEY
 
@@ -1145,6 +1223,7 @@ def load_dotstts_bundle(
     device = resolve_device(device_name)
     precision = resolve_precision(dtype_name, device, spec.get("model_precision"))
     runtime_attention, attn_impl = resolve_attention(attention, device)
+    compile_enabled = resolve_compile(bool(compile), device)
     load_key = (
         str(runtime_dir.resolve()),
         str(weight_file.resolve()),
@@ -1153,6 +1232,7 @@ def load_dotstts_bundle(
         precision,
         runtime_attention,
         device_name,
+        compile_enabled,
     )
     if _ACTIVE_BUNDLE is not None and _ACTIVE_LOAD_KEY == load_key:
         resume_bundle_to_device(_ACTIVE_BUNDLE)
@@ -1161,11 +1241,12 @@ def load_dotstts_bundle(
         unload_dotstts_bundle(_ACTIVE_BUNDLE, reason="load settings changed")
 
     logger.info(
-        "Loading Dots TTS from %s on %s with precision=%s attention=%s.",
+        "Loading Dots TTS from %s on %s with precision=%s attention=%s compile=%s.",
         runtime_dir,
         device,
         precision,
         runtime_attention,
+        compile_enabled,
     )
     initial_device = torch.device("cpu") if device.type != "cpu" else device
     runtime = DotsTtsRuntime.from_pretrained(
@@ -1196,10 +1277,12 @@ def load_dotstts_bundle(
         dtype_choice=dtype_name,
         device_choice=device_name,
         download_if_missing=bool(download_if_missing),
+        compile=compile_enabled,
     )
     _ACTIVE_BUNDLE = bundle
     _ACTIVE_LOAD_KEY = load_key
     resume_bundle_to_device(bundle)
+    _enable_bundle_compile(bundle)
     _empty_accelerator_cache()
     logger.info("Dots TTS loaded successfully.")
     return bundle

@@ -187,10 +187,10 @@ class SLSTM(nn.Module):
             hx = hidden_h[layer_idx]
             cx = hidden_c[layer_idx]
             outputs = []
-            weight_ih = getattr(self.lstm, f"weight_ih_l{layer_idx}")
-            weight_hh = getattr(self.lstm, f"weight_hh_l{layer_idx}")
-            bias_ih = getattr(self.lstm, f"bias_ih_l{layer_idx}")
-            bias_hh = getattr(self.lstm, f"bias_hh_l{layer_idx}")
+            weight_ih = self._stream_weight_ih[layer_idx]
+            weight_hh = self._stream_weight_hh[layer_idx]
+            bias_ih = self._stream_bias_ih[layer_idx]
+            bias_hh = self._stream_bias_hh[layer_idx]
 
             for frame_idx in range(x.size(1)):
                 gates = F.linear(layer_input[:, frame_idx, :], weight_ih, bias_ih)

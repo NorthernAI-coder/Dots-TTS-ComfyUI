@@ -10,6 +10,15 @@
 
 <img width="1555" height="1146" alt="Screenshot 2026-06-06 054154" src="https://github.com/user-attachments/assets/ffbcd3be-fe89-4d38-85eb-5872635f34f2" />
 
+## v0.1.3 更新
+
+- 在 Dots TTS 加载模型节点底部新增可选的 `compile` 开关，使用原生 PyTorch Inductor/Triton 编译。
+- 新增 CUDA、Triton、Inductor、编译长度和 `cudaMallocAsync` 兼容性检查。使用 `cudaMallocAsync` 时会自动禁用 CUDA Graph Trees，同时保留 Triton 编译。
+- 编译兼容 SDPA 和 Flash Attention。更改编译、模型、设备、数据类型或注意力设置时，会先完全卸载之前的模型包。
+- 修复流式声码器 LSTM 编译，并且不会启用可能影响其他 ComfyUI 节点的全局 Dynamo 设置。
+- 手动卸载时会清除已编译图和静态生成工作区。
+- 终端会在第一个音频补丁准备完成前显示 `Preparing/compiling`。每个长度桶的第一次运行会因 PyTorch 编译而较慢。
+
 ## 节点
 
 - Dots TTS 加载模型
@@ -108,6 +117,12 @@ drbaph/dots.tts-common/vocoder.safetensors
 ## 生成限制
 
 "生成"和"语音克隆"上的 `max_audio_patches` 是该次生成的最大音频补丁预算，而不是文本标记限制。默认值为 `500`。使用捆绑的配置，一个补丁大约是 `0.32` 秒，因此 `500` 大约是 `160` 秒的音频预算。模型在达到 EOS 时可以提前停止；非常长的文本可能会达到上限并提前结束。与 `reference_text` 配对的语音克隆提示音频也会消耗此预算的一部分。
+
+## 性能
+
+加载器底部的可选 `compile` 开关使用上游原生 `torch.compile` 路径以及 PyTorch Inductor 和 Triton。它仅支持 CUDA，需要可用的 Triton，并兼容 SDPA 和 Flash Attention。当 ComfyUI 使用 `cudaMallocAsync` 分配器时，节点会自动禁用不兼容的 CUDA Graph Trees，同时继续启用 Inductor/Triton 编译。编译采用延迟方式：每个 `max_audio_patches` 长度桶的第一次生成会因编译而较慢，之后的生成会复用已编译图。编译模式最多支持 `1024` 个音频补丁。更改模型、设备、数据类型、注意力或编译设置时，会先完全卸载当前模型包；手动卸载也会清除已编译图和生成工作区。
+
+追求最快速度时，请使用 MF BF16 检查点并设置 `steps=4`。较小的 `max_audio_patches` 还可以选择较小的编译桶，从而减少编译时间和工作区内存。上游建议将长文本拆成较短片段，并将语音克隆参考音频保持在约 10 秒。
 
 ## 语言
 

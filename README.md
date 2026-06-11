@@ -10,6 +10,15 @@ ComfyUI custom nodes for [rednote-hilab/dots.tts](https://github.com/rednote-hil
 
 <img width="1555" height="1146" alt="Screenshot 2026-06-06 054154" src="https://github.com/user-attachments/assets/ffbcd3be-fe89-4d38-85eb-5872635f34f2" />
 
+## What's New in v0.1.3
+
+- Added an opt-in `compile` toggle to the bottom of Dots TTS Load Model using native PyTorch Inductor/Triton compilation.
+- Added CUDA, Triton, Inductor, compile-length, and `cudaMallocAsync` compatibility guards. CUDA Graph Trees are disabled automatically with `cudaMallocAsync` while Triton compilation remains active.
+- Compile works with SDPA and Flash Attention. Changing compile, model, device, dtype, or attention fully unloads the previous bundle before reloading.
+- Fixed streaming vocoder LSTM compilation without enabling global Dynamo settings that could affect other ComfyUI nodes.
+- Compiled graphs and static generation workspaces are cleared during manual unload.
+- The terminal now displays `Preparing/compiling` until the first audio patch is ready. The first run for each length bucket is slower while PyTorch compiles it.
+
 ## Nodes
 
 - Dots TTS Load Model
@@ -110,6 +119,12 @@ At load time the node assembles an upstream-compatible runtime cache under `runt
 `max_audio_patches` on both Generate and Voice Clone is the maximum audio patch budget for that generation, not a text-token limit. The default is `500`. With the bundled configs, one patch is about `0.32` seconds, so `500` is about `160` seconds of audio budget. The model can stop earlier when it reaches EOS; very long text can hit the cap and end early. Voice Clone prompt audio paired with `reference_text` also consumes part of this budget.
 
 Generation uses a live `tqdm` terminal progress bar with percentage, elapsed time, estimated remaining time, and iteration speed. Since Dots TTS decides its final length by EOS during generation, the live total is the configured `max_audio_patches` ceiling; after a successful early stop, the completed bar is normalized to the actual emitted chunk count.
+
+## Performance
+
+The loader's optional `compile` toggle uses upstream's native `torch.compile` path with PyTorch Inductor and Triton. It is CUDA-only, requires a working Triton installation, and is compatible with both SDPA and Flash Attention. When ComfyUI uses the `cudaMallocAsync` allocator, the node automatically disables incompatible CUDA Graph Trees while keeping Inductor/Triton compilation enabled. Compilation is lazy: the first generation for each `max_audio_patches` length bucket is slower while the graph is compiled, then later generations reuse it. Compiled mode supports up to `1024` audio patches. Changing the model, device, dtype, attention, or compile setting fully unloads the active bundle before loading the new one; manual unload also clears compiled graphs and generation workspaces.
+
+For the fastest model path, use the MF BF16 checkpoint with `steps=4`. Smaller `max_audio_patches` values can also select a smaller compile bucket and reduce compile time and workspace memory. Upstream recommends splitting long text into shorter segments and keeping voice-clone reference audio around 10 seconds.
 
 ## Languages
 

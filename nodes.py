@@ -155,6 +155,13 @@ class DotsTTSLoadModel:
                         "tooltip": "Download missing Dots assets from Hugging Face. BF16 entries use the drbaph BF16 repos; fp32 entries use the original rednote-hilab repos.",
                     },
                 ),
+                "compile": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "Experimental CUDA acceleration using native torch.compile with PyTorch Inductor and Triton. Compatible with SDPA, Flash Attention, and ComfyUI's cudaMallocAsync allocator; incompatible CUDA Graph Trees are disabled automatically. The first generation for each max_audio_patches bucket is slower while it compiles; later generations reuse that graph. Changing this setting fully unloads the active model. Requires working Triton, uses extra memory/cache space, and supports up to 1024 audio patches.",
+                    },
+                ),
             },
         }
 
@@ -171,6 +178,7 @@ class DotsTTSLoadModel:
         dtype: str,
         attention: str,
         download_if_missing: bool,
+        compile: bool = False,
     ) -> tuple[object]:
         bundle = load_dotstts_bundle(
             model_choice=model,
@@ -178,6 +186,7 @@ class DotsTTSLoadModel:
             device_name=device,
             attention=attention,
             download_if_missing=bool(download_if_missing),
+            compile=bool(compile),
         )
         return (bundle,)
 
